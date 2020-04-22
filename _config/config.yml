@@ -1,0 +1,6 @@
+---
+Name: data-object-actions
+---
+SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest:
+  extensions:
+    - Level51\DataObjectActions\DataObjectActionGridFieldItemRequest

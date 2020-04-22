@@ -1,0 +1,28 @@
+{
+    "name": "level51/silverstripe-data-object-actions",
+    "version": "0.0.1",
+    "time": "2020-04-21",
+    "description": "Custom GridField detail form actions for DataObjects",
+    "keywords": [
+        "silverstripe"
+    ],
+    "type": "silverstripe-vendormodule",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Level51",
+            "email": "hallo@lvl51.de"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "silverstripe/framework": "^4.0",
+        "silverstripe/vendor-plugin": "^1"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Level51\\DataObjectActions\\": "src/"
+        }
+    }
+}
