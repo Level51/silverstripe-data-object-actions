@@ -1,7 +1,7 @@
 {
     "name": "level51/silverstripe-data-object-actions",
-    "version": "0.0.1",
-    "time": "2020-04-21",
+    "version": "0.1.0",
+    "time": "2020-04-28",
     "description": "Custom GridField detail form actions for DataObjects",
     "keywords": [
         "silverstripe"
