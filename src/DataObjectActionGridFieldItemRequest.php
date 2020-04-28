@@ -2,18 +2,17 @@
 
 namespace Level51\DataObjectActions;
 
-use CE\ServicePlatform\Pigment;
-use CE\ServicePlatform\PigmentItemRequest;
-use SilverStripe\Core\Convert;
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Control\HTTPResponse_Exception;
+use SilverStripe\Control\RequestHandler;
 use SilverStripe\Core\Extension;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
-use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\ValidationException;
 use SilverStripe\ORM\ValidationResult;
-use SilverStripe\Versioned\RecursivePublishable;
 use SilverStripe\Versioned\Versioned;
 
 /**
@@ -47,6 +46,10 @@ class DataObjectActionGridFieldItemRequest extends Extension {
      *
      * @param array $data
      * @param Form  $form
+     *
+     * @return mixed|HTTPResponse|void
+     * @throws HTTPResponse_Exception
+     * @throws ValidationException
      */
     public function customDataObjectAction($data, $form) {
         $action = array_keys($data['action_customDataObjectAction']);
@@ -100,7 +103,7 @@ class DataObjectActionGridFieldItemRequest extends Extension {
      *
      * @param $isNewRecord
      *
-     * @return mixed|\SilverStripe\Control\HTTPResponse
+     * @return mixed|HTTPResponse
      */
     protected function redirectAfterSave($isNewRecord) {
         $controller = $this->getToplevelController();
@@ -126,7 +129,7 @@ class DataObjectActionGridFieldItemRequest extends Extension {
      *
      * We have to copy the function as it's not callable by $this->owner due to the protected state.
      *
-     * @return \SilverStripe\Control\Controller|\SilverStripe\Control\RequestHandler
+     * @return Controller|RequestHandler
      */
     protected function getToplevelController() {
         $c = $this->owner->popupController;
