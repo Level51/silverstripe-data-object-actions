@@ -6,7 +6,9 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\HTTPResponse_Exception;
 use SilverStripe\Control\RequestHandler;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Extension;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
@@ -62,7 +64,20 @@ class DataObjectActionGridFieldItemRequest extends Extension {
         if (!$record->canEdit() || !$record->hasMethod($action))
             return $this->owner->httpError(403);
 
+        // Remember the state of the record before the custom action executed
+        $recordBeforeCustomAction = Injector::inst()->create(get_class($record), $record->toMap(), false, $record->getSourceQueryParams());
+
+        // Call custom action
         $message = $record->{$action}($data, $form);
+
+        // Check if any of the records db fields has been changed, update the according form field value if found
+        // Otherwise the `saveFormIntoRecord` call would overwrite the custom change
+        foreach ($record->config()->get('db') as $fieldName => $fieldType) {
+            if ($recordBeforeCustomAction->{$fieldName} !== $record->{$fieldName}
+                && $form->Fields()->dataFieldByName($fieldName)) {
+                $form->Fields()->dataFieldByName($fieldName)->setValue($record->{$fieldName});
+            }
+        }
 
         // Save from form data
         $this->owner->saveFormIntoRecord($data, $form);
