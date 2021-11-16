@@ -16,13 +16,18 @@ use SilverStripe\ORM\DataObject;
 // Implement DataObjectActionProvider interface on your DataObject
 class MyDataObject extends DataObject implements DataObjectActionProvider {
 
-  // Return a field list containing all custom actions, each one of type DataObjectAction
+  // Return a field list containing all custom actions, each one of type DataObjectAction or DataObjectLink
   public function getCustomActions() {
-    return FieldList::create([
-      DataObjectAction::create('myCustomAction', 'My Custom Action')
-        ->addExtraClass('btn-outline-primary font-icon-rocket')
-        ->setUseButtonTag(true)
-      ]);
+    return FieldList::create(
+      [
+        DataObjectAction::create('myCustomAction', 'My Custom Action')
+          ->addExtraClass('btn-outline-primary font-icon-rocket')
+          ->setUseButtonTag(true),
+        DataObjectLink::create('externalLink', 'External Link', 'https://lvl51.de')
+        	->addExtraClass('btn-outline-dark font-icon-external-link')
+          ->setNewWindow(true)
+      ]
+    );
   }
 	
   // Implement the handler method(s)
