@@ -61,8 +61,16 @@ class DataObjectActionGridFieldItemRequest extends Extension {
         $record = $this->owner->getRecord();
         $isNewRecord = $record->ID == 0;
 
-        if (!$record->canEdit() || !$record->hasMethod($action))
+        if (!$record->hasMethod($action)) {
             return $this->owner->httpError(403);
+        }
+
+        $formAction = $this->getCustomActions()->fieldByName("action_customDataObjectAction[$action]");
+
+        // Check if the record can be edited, skip the check if the "alwaysEnabled" flag is set for the current action
+        if (!$record->canEdit() && !($formAction && get_class($formAction) === DataObjectAction::class && $formAction->isAlwaysEnabled())) {
+            return $this->owner->httpError(403);
+        }
 
         // Remember the state of the record before the custom action executed
         $recordBeforeCustomAction = Injector::inst()->create(get_class($record), $record->toMap(), false, $record->getSourceQueryParams());
@@ -95,18 +103,10 @@ class DataObjectActionGridFieldItemRequest extends Extension {
      * @param FieldList $actions
      */
     public function updateFormActions(FieldList $actions) {
-        /** @var Versioned|DataObject|DataObjectActionProvider $record */
-        $record = $this->owner->getRecord();
-
-        if ($record instanceof DataObjectActionProvider) {
-            /** @var FieldList||null $customActions */
-            $customActions = $record->getCustomActions();
-
-            if ($customActions && $customActions->count() > 0) {
-                /** @var DataObjectAction $formAction */
-                foreach ($customActions as $formAction) {
-                    $actions->insertAfter('MajorActions', $formAction);
-                }
+        if ($customActions = $this->getCustomActions()) {
+            /** @var DataObjectAction $formAction */
+            foreach ($customActions as $formAction) {
+                $actions->insertAfter('MajorActions', $formAction);
             }
         }
     }
@@ -121,6 +121,26 @@ class DataObjectActionGridFieldItemRequest extends Extension {
      * @return void
      */
     public function updateItemEditForm(Form $form) {
+        if ($customActions = $this->getCustomActions()) {
+            $actions = $form->Actions();
+            /** @var DataObjectAction $formAction */
+            foreach ($customActions as $formAction) {
+                if ($action = $actions->fieldByName($formAction->getName())) {
+                    // Re-enable actions which should not be read-only
+                    if ($action->isReadonly() && $formAction->isAlwaysEnabled()) {
+                        $action->setReadonly(false);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Get the list of custom actions from the linked record.
+     *
+     * @return FieldList|void
+     */
+    protected function getCustomActions() {
         /** @var Versioned|DataObject|DataObjectActionProvider $record */
         $record = $this->owner->getRecord();
 
@@ -129,16 +149,7 @@ class DataObjectActionGridFieldItemRequest extends Extension {
             $customActions = $record->getCustomActions();
 
             if ($customActions && $customActions->count() > 0) {
-                $actions = $form->Actions();
-                /** @var DataObjectAction $formAction */
-                foreach ($customActions as $formAction) {
-                    if ($action = $actions->fieldByName($formAction->getName())) {
-                        // Re-enable actions which should not be read-only
-                        if ($action->isReadonly() && $formAction->isAlwaysEnabled()) {
-                            $action->setReadonly(false);
-                        }
-                    }
-                }
+                return $customActions;
             }
         }
     }
