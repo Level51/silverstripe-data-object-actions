@@ -79,4 +79,8 @@ class DataObjectLink extends LiteralField
         $this->newWindow = $newWindow;
         return $this;
     }
+
+    public function isAlwaysEnabled() {
+        return false;
+    }
 }
