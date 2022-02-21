@@ -112,6 +112,38 @@ class DataObjectActionGridFieldItemRequest extends Extension {
     }
 
     /**
+     * Hook into the ItemEditForm method.
+     *
+     * Necessary to re-enable custom actions with the "alwaysEnabled" flag after it got
+     * read-only when the edit form itself is read-only (e.g. if the user is not allowed to edit).
+     *
+     * @param Form $form
+     * @return void
+     */
+    public function updateItemEditForm(Form $form) {
+        /** @var Versioned|DataObject|DataObjectActionProvider $record */
+        $record = $this->owner->getRecord();
+
+        if ($record instanceof DataObjectActionProvider) {
+            /** @var FieldList||null $customActions */
+            $customActions = $record->getCustomActions();
+
+            if ($customActions && $customActions->count() > 0) {
+                $actions = $form->Actions();
+                /** @var DataObjectAction $formAction */
+                foreach ($customActions as $formAction) {
+                    if ($action = $actions->fieldByName($formAction->getName())) {
+                        // Re-enable actions which should not be read-only
+                        if ($action->isReadonly() && $formAction->isAlwaysEnabled()) {
+                            $action->setReadonly(false);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Same as in {@see GridFieldDetailForm_ItemRequest}
      *
      * We have to copy the function as it's not callable by $this->owner due to the protected state.
