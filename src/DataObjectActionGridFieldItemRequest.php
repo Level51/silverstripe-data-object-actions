@@ -144,9 +144,11 @@ class DataObjectActionGridFieldItemRequest extends Extension {
         /** @var Versioned|DataObject|DataObjectActionProvider $record */
         $record = $this->owner->getRecord();
 
-        if ($record instanceof DataObjectActionProvider) {
+        if ($record instanceof DataObjectActionProvider || $record->hasExtension(DataExtension::class)) {
             /** @var FieldList||null $customActions */
             $customActions = $record->getCustomActions();
+
+            $record->extend('updateCustomActions', $customActions);
 
             if ($customActions && $customActions->count() > 0) {
                 return $customActions;
