@@ -17,7 +17,8 @@ use SilverStripe\ORM\DataObject;
 class MyDataObject extends DataObject implements DataObjectActionProvider {
 
   // Return a field list containing all custom actions, each one of type DataObjectAction or DataObjectLink
-  public function getCustomActions() {
+  public function getCustomActions() 
+  {
     return FieldList::create(
       [
         DataObjectAction::create('myCustomAction', 'My Custom Action')
@@ -31,7 +32,8 @@ class MyDataObject extends DataObject implements DataObjectActionProvider {
   }
 	
   // Implement the handler method(s)
-  public function myCustomAction($data, $form) {
+  public function myCustomAction($data, $form) 
+  {
     // Do stuff, e.g. set a property
     // Do NOT call $this->write(), this will be done automatically
 		
@@ -43,6 +45,23 @@ class MyDataObject extends DataObject implements DataObjectActionProvider {
 
 }
 ```
+
+### Usage with DataExtensions
+You can update the custom actions of a parent class implementing the DataObjectActionProvider interface 
+using the `updateCustomActions` extension hook.
+
+```php
+public function updateCustomActions(FieldList $fields)
+{
+    $fields->push(
+        DataObjectAction::create(...)
+    );
+}
+```
+
+To be able to add custom actions to a owner class which is out of your control (e.g. core Member class)
+you have to use the Level51\DataObjectActions\DataExtension class as base class of your 
+extension. With that you are able to use the getCustomActions method as shown above.
 
 ## Requirements
 - SilverStripe ^4.0
