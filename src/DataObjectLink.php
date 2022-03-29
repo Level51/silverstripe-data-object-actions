@@ -80,7 +80,8 @@ class DataObjectLink extends LiteralField
         return $this;
     }
 
-    public function isAlwaysEnabled() {
+    public function isAlwaysEnabled()
+    {
         return false;
     }
 }

@@ -24,7 +24,8 @@ use SilverStripe\Versioned\Versioned;
  *
  * @package Level51\DataObjectActions
  */
-class DataObjectActionGridFieldItemRequest extends Extension {
+class DataObjectActionGridFieldItemRequest extends Extension
+{
 
     const CUSTOM_ACTION_NAME = 'customDataObjectAction';
 
@@ -53,7 +54,8 @@ class DataObjectActionGridFieldItemRequest extends Extension {
      * @throws HTTPResponse_Exception
      * @throws ValidationException
      */
-    public function customDataObjectAction($data, $form) {
+    public function customDataObjectAction($data, $form)
+    {
         $action = array_keys($data['action_customDataObjectAction']);
         $action = array_shift($action);
 
@@ -90,8 +92,9 @@ class DataObjectActionGridFieldItemRequest extends Extension {
         // Save from form data
         $this->owner->saveFormIntoRecord($data, $form);
 
-        if ($message)
+        if ($message) {
             $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
+        }
 
         // Redirect after save
         return $this->redirectAfterSave($isNewRecord);
@@ -102,7 +105,8 @@ class DataObjectActionGridFieldItemRequest extends Extension {
      *
      * @param FieldList $actions
      */
-    public function updateFormActions(FieldList $actions) {
+    public function updateFormActions(FieldList $actions)
+    {
         if ($customActions = $this->getCustomActions()) {
             /** @var DataObjectAction $formAction */
             foreach ($customActions as $formAction) {
@@ -120,7 +124,8 @@ class DataObjectActionGridFieldItemRequest extends Extension {
      * @param Form $form
      * @return void
      */
-    public function updateItemEditForm(Form $form) {
+    public function updateItemEditForm(Form $form)
+    {
         if ($customActions = $this->getCustomActions()) {
             $actions = $form->Actions();
             /** @var DataObjectAction $formAction */
@@ -140,7 +145,8 @@ class DataObjectActionGridFieldItemRequest extends Extension {
      *
      * @return FieldList|void
      */
-    protected function getCustomActions() {
+    protected function getCustomActions()
+    {
         /** @var Versioned|DataObject|DataObjectActionProvider $record */
         $record = $this->owner->getRecord();
 
@@ -165,7 +171,8 @@ class DataObjectActionGridFieldItemRequest extends Extension {
      *
      * @return mixed|HTTPResponse
      */
-    protected function redirectAfterSave($isNewRecord) {
+    protected function redirectAfterSave($isNewRecord)
+    {
         $controller = $this->getToplevelController();
         if ($isNewRecord) {
             return $controller->redirect($this->owner->Link());
@@ -191,7 +198,8 @@ class DataObjectActionGridFieldItemRequest extends Extension {
      *
      * @return Controller|RequestHandler
      */
-    protected function getToplevelController() {
+    protected function getToplevelController()
+    {
         $c = $this->owner->popupController;
         while ($c && $c instanceof GridFieldDetailForm_ItemRequest) {
             $c = $c->getController();
