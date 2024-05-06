@@ -1,5 +1,5 @@
 # SilverStripe DataObject Actions
-Module for SilverStripe 4 allowing to add custom actions for DataObjects to the GridFieldDetailForm.
+Module for Silverstripe 5 allowing to add custom actions for DataObjects to the GridFieldDetailForm. See `0.X` releases for Silverstripe 4 support.
 
 ## Installation
 `composer require level51/silverstripe-data-object-actions`
@@ -59,13 +59,13 @@ public function updateCustomActions(FieldList $fields)
 }
 ```
 
-To be able to add custom actions to a owner class which is out of your control (e.g. core Member class)
+To be able to add custom actions to an owner class which is out of your control (e.g. core Member class)
 you have to use the Level51\DataObjectActions\DataExtension class as base class of your 
 extension. With that you are able to use the getCustomActions method as shown above.
 
 ## Requirements
-- SilverStripe ^4.0
-- PHP >= 7.0
+- SilverStripe ^5.0
+- PHP >= 8.0
 
 ## Maintainer
 - Level51 <hallo@lvl51.de>
