@@ -36,6 +36,8 @@ class MyDataObject extends DataObject implements DataObjectActionProvider {
   {
     // Do stuff, e.g. set a property
     // Do NOT call $this->write(), this will be done automatically
+    // use `setWriteBeforeAction` when creating the action if the record 
+    // should be written before the action is executed
 		
     // throw a new \SilverStripe\ORM\ValidationResult in case something failed
 		
@@ -62,6 +64,10 @@ public function updateCustomActions(FieldList $fields)
 To be able to add custom actions to an owner class which is out of your control (e.g. core Member class)
 you have to use the Level51\DataObjectActions\DataExtension class as base class of your 
 extension. With that you are able to use the getCustomActions method as shown above.
+
+## Action Options
+- use `setIsAlwaysEnabled` to always enable the action, even if the whole edit form is read-only
+- use `setWriteBeforeAction` if the record should be written before the action is executed
 
 ## Requirements
 - SilverStripe ^5.0

@@ -18,6 +18,9 @@ class DataObjectAction extends FormAction
     /** @var bool Set to true, if the action should be enabled even if the whole edit form is read-only */
     protected $alwaysEnabled = false;
 
+    /** @var bool Set to true, if the record should be written before the action is executed */
+    protected $writeBeforeAction = false;
+
     public function __construct($action, $title = "", $form = null)
     {
         $action = sprintf('%s[%s]', DataObjectActionGridFieldItemRequest::CUSTOM_ACTION_NAME, $action);
@@ -35,5 +38,17 @@ class DataObjectAction extends FormAction
     public function isAlwaysEnabled()
     {
         return $this->alwaysEnabled;
+    }
+
+    public function setWriteBeforeAction($writeBeforeAction)
+    {
+        $this->writeBeforeAction = $writeBeforeAction;
+
+        return $this;
+    }
+
+    public function shouldWriteBeforeAction()
+    {
+        return $this->writeBeforeAction;
     }
 }
