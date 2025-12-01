@@ -67,37 +67,62 @@ class DataObjectActionGridFieldItemRequest extends Extension
             return $this->owner->httpError(403);
         }
 
-        $formAction = $this->getCustomActions()->fieldByName("action_customDataObjectAction[$action]");
+        $customActions = $this->getCustomActions();
 
-        // Check if the record can be edited, skip the check if the "alwaysEnabled" flag is set for the current action
-        if (!$record->canEdit() && !($formAction && get_class($formAction) === DataObjectAction::class && $formAction->isAlwaysEnabled())) {
+        if (!$customActions) {
             return $this->owner->httpError(403);
         }
 
-        // Remember the state of the record before the custom action executed
-        $recordBeforeCustomAction = Injector::inst()->create(get_class($record), $record->toMap(), false, $record->getSourceQueryParams());
+        $formAction = $customActions->fieldByName("action_customDataObjectAction[$action]");
 
-        // Call custom action
-        $message = $record->{$action}($data, $form);
+        if (!$formAction) {
+            return $this->owner->httpError(403);
+        }
 
-        // Check if any of the records db fields has been changed, update the according form field value if found
-        // Otherwise the `saveFormIntoRecord` call would overwrite the custom change
-        foreach ($record->config()->get('db') as $fieldName => $fieldType) {
-            if ($recordBeforeCustomAction->{$fieldName} !== $record->{$fieldName}
-                && $form->Fields()->dataFieldByName($fieldName)) {
-                $form->Fields()->dataFieldByName($fieldName)->setValue($record->{$fieldName});
+        // Check if the record can be edited, skip the check if the "alwaysEnabled" flag is set for the current action
+        if (!$record->canEdit() && !(get_class($formAction) === DataObjectAction::class && $formAction->isAlwaysEnabled())) {
+            return $this->owner->httpError(403);
+        }
+
+        if ($formAction->shouldWriteBeforeAction()) {
+            // Save from form data
+            $this->owner->saveFormIntoRecord($data, $form);
+
+            // Call custom action
+            $message = $record->{$action}($data, $form);
+
+            if ($message) {
+                $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
             }
+
+            // Redirect after save
+            return $this->redirectAfterSave($isNewRecord);
+        } else {
+            // Remember the state of the record before the custom action executed
+            $recordBeforeCustomAction = Injector::inst()->create(get_class($record), $record->toMap(), false, $record->getSourceQueryParams());
+
+            // Call custom action
+            $message = $record->{$action}($data, $form);
+
+            // Check if any of the records db fields has been changed, update the according form field value if found
+            // Otherwise the `saveFormIntoRecord` call would overwrite the custom change
+            foreach ($record->config()->get('db') as $fieldName => $fieldType) {
+                if ($recordBeforeCustomAction->{$fieldName} !== $record->{$fieldName}
+                    && $form->Fields()->dataFieldByName($fieldName)) {
+                    $form->Fields()->dataFieldByName($fieldName)->setValue($record->{$fieldName});
+                }
+            }
+
+            // Save from form data
+            $this->owner->saveFormIntoRecord($data, $form);
+
+            if ($message) {
+                $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
+            }
+
+            // Redirect after save
+            return $this->redirectAfterSave($isNewRecord);
         }
-
-        // Save from form data
-        $this->owner->saveFormIntoRecord($data, $form);
-
-        if ($message) {
-            $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
-        }
-
-        // Redirect after save
-        return $this->redirectAfterSave($isNewRecord);
     }
 
     /**
