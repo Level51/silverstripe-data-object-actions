@@ -1,5 +1,6 @@
 # SilverStripe DataObject Actions
-Module for Silverstripe 5 allowing to add custom actions for DataObjects to the GridFieldDetailForm. See `0.X` releases for Silverstripe 4 support.
+Module for Silverstripe 6 allowing to add custom actions for DataObjects to the GridFieldDetailForm. 
+See `0.X` releases for Silverstripe 4 support and `1.X` releases for Silverstripe 5 support.
 
 ## Installation
 `composer require level51/silverstripe-data-object-actions`
@@ -39,7 +40,7 @@ class MyDataObject extends DataObject implements DataObjectActionProvider {
     // use `setWriteBeforeAction` when creating the action if the record 
     // should be written before the action is executed
 		
-    // throw a new \SilverStripe\ORM\ValidationResult in case something failed
+    // throw a new \SilverStripe\Core\Validation\ValidationException in case something failed
 		
     // Optionally return a success message
     return 'Success message';
@@ -70,7 +71,7 @@ extension. With that you are able to use the getCustomActions method as shown ab
 - use `setWriteBeforeAction` if the record should be written before the action is executed
 
 ## Requirements
-- SilverStripe ^5.0
+- SilverStripe ^6
 - PHP >= 8.0
 
 ## Maintainer

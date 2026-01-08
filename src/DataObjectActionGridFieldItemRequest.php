@@ -6,15 +6,14 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\HTTPResponse_Exception;
 use SilverStripe\Control\RequestHandler;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\ValidationException;
-use SilverStripe\ORM\ValidationResult;
+use SilverStripe\Core\Validation\ValidationException;
+use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\Versioned\Versioned;
 
 /**
