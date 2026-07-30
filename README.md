@@ -42,7 +42,7 @@ class MyDataObject extends DataObject implements DataObjectActionProvider {
 		
     // throw a new \SilverStripe\Core\Validation\ValidationException in case something failed
 		
-    // Optionally return a success message
+    // Optionally return a success message or a full HTTPResponse in case you need a custom redirect location
     return 'Success message';
   }
 
