@@ -33,7 +33,7 @@ class DataObjectActionGridFieldItemRequest extends Extension
         'edit',
         'view',
         'ItemEditForm',
-        'customDataObjectAction'
+        'customDataObjectAction',
     ];
 
     /**
@@ -89,20 +89,15 @@ class DataObjectActionGridFieldItemRequest extends Extension
             $this->owner->saveFormIntoRecord($data, $form);
 
             // Call custom action
-            $message = $record->{$action}($data, $form);
+            $retVal = $record->{$action}($data, $form);
 
-            if ($message) {
-                $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
-            }
-
-            // Redirect after save
-            return $this->redirectAfterSave($isNewRecord);
+            return $this->handleResponse($retVal, $form, $isNewRecord);
         } else {
             // Remember the state of the record before the custom action executed
             $recordBeforeCustomAction = Injector::inst()->create(get_class($record), $record->toMap(), false, $record->getSourceQueryParams());
 
             // Call custom action
-            $message = $record->{$action}($data, $form);
+            $retVal = $record->{$action}($data, $form, $this->owner);
 
             // Check if any of the records db fields has been changed, update the according form field value if found
             // Otherwise the `saveFormIntoRecord` call would overwrite the custom change
@@ -116,12 +111,7 @@ class DataObjectActionGridFieldItemRequest extends Extension
             // Save from form data
             $this->owner->saveFormIntoRecord($data, $form);
 
-            if ($message) {
-                $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
-            }
-
-            // Redirect after save
-            return $this->redirectAfterSave($isNewRecord);
+            return $this->handleResponse($retVal, $form, $isNewRecord);
         }
     }
 
@@ -188,6 +178,30 @@ class DataObjectActionGridFieldItemRequest extends Extension
     }
 
     /**
+     * Determine the response depending on the return value of the custom action.
+     *
+     * @param $actionReturnValue
+     * @param $form
+     * @param $isNewRecord
+     * @return mixed|HTTPResponse
+     */
+    protected function handleResponse($actionReturnValue, $form, $isNewRecord)
+    {
+        // custom function returned a string -> use it as session message
+        if ($actionReturnValue && is_string($actionReturnValue)) {
+            $form->sessionMessage($actionReturnValue, 'good', ValidationResult::CAST_HTML);
+        }
+
+        // custom function returned a HTTPResponse (e.g. a custom redirect) - directly return that
+        if ($actionReturnValue instanceof HTTPResponse) {
+            return $actionReturnValue;
+        }
+
+        // Redirect after save
+        return $this->redirectAfterSave($isNewRecord);
+    }
+
+    /**
      * Same as in {@see GridFieldDetailForm_ItemRequest}
      *
      * We have to copy the function as it's not callable by $this->owner due to the protected state.
@@ -223,7 +237,7 @@ class DataObjectActionGridFieldItemRequest extends Extension
      *
      * @return Controller|RequestHandler
      */
-    protected function getToplevelController()
+    public function getToplevelController()
     {
         $c = $this->owner->popupController;
         while ($c && $c instanceof GridFieldDetailForm_ItemRequest) {
@@ -231,5 +245,25 @@ class DataObjectActionGridFieldItemRequest extends Extension
         }
 
         return $c;
+    }
+
+    /**
+     * Helper function for redirecting to a different record after the execution of a custom action.
+     *
+     * @param string|int  $id
+     * @param string|null $action
+     * @return HTTPResponse|null
+     */
+    public function redirectToRecord($id, $action = null)
+    {
+        $controller = $this->getToplevelController();
+
+        return $controller->redirect(
+            Controller::join_links(
+                $this->owner->getGridField()->Link('item'),
+                $id,
+                $action
+            )
+        );
     }
 }
